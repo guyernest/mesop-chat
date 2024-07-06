@@ -1,31 +1,68 @@
-import random
-import time
+import json
+from typing import Dict, Any
+import boto3
+
 
 import mesop as me
 import mesop.labs as mel
 
+ssm = boto3.client('ssm')
+
+bedrock_agent_runtime_client = boto3.client('bedrock-agent-runtime')
+agent_id = ssm.get_parameter(Name='/bedrock-agent-data/Bedrock-agent-id')['Parameter']['Value']
+agent_alias_id = ssm.get_parameter(Name='/bedrock-agent-data/Bedrock-agent-alias-id')['Parameter']['Value']
 
 @me.page(
   path="/chat",
-  title="Mesop Demo Chat",
+  title="Bedrock Agent Demo Chat",
 )
 
 def page():
-  mel.chat(transform, title="Mesop Demo Chat", bot_user="Mesop Bot")
+  mel.chat(transform, title="Bedrock Agent Demo Chat", bot_user="Baseball Bot")
 
+# Extract the SQL query and reply as it was sent to the Lambda in the orchestration phase.
+def extract_sql(trace_dict: Dict[str, Any]) -> Dict[str, Any]:
+    trace = {}
+
+    orchestration_trace = trace_dict.get('orchestrationTrace', {})
+    invocation_input = orchestration_trace.get('invocationInput', {})
+    action_group_input = invocation_input.get('actionGroupInvocationInput', {})
+
+    if action_group_input.get('apiPath') == '/querydatabase':
+        parameters = action_group_input.get('parameters', [])
+        for param in parameters:
+            if param.get('name') == 'query':
+                trace['sql'] = param.get('value')
+
+    observation = orchestration_trace.get('observation', {})
+    action_group_output = observation.get('actionGroupInvocationOutput', {})
+    query_response = action_group_output.get('text')
+
+    if query_response:
+        trace['table'] = json.loads(query_response)
+
+    return trace
 
 def transform(input: str, history: list[mel.ChatMessage]):
-  for line in random.sample(LINES, random.randint(3, len(LINES) - 1)):
-    time.sleep(0.3)
-    yield line + " "
+    print(input)
+    response = bedrock_agent_runtime_client.invoke_agent(
+        agentAliasId=agent_alias_id,
+        agentId=agent_id,
+        inputText=input,
+        enableTrace=True,
+        sessionId="42",
+    )
+    completion = ""
 
-
-LINES = [
-  "Mesop is a Python-based UI framework designed to simplify web UI development for engineers without frontend experience.",
-  "It leverages the power of the Angular web framework and Angular Material components, allowing rapid construction of web demos and internal tools.",
-  "With Mesop, developers can enjoy a fast build-edit-refresh loop thanks to its hot reload feature, making UI tweaks and component integration seamless.",
-  "Deployment is straightforward, utilizing standard HTTP technologies.",
-  "Mesop's component library aims for comprehensive Angular Material component coverage, enhancing UI flexibility and composability.",
-  "It supports custom components for specific use cases, ensuring developers can extend its capabilities to fit their unique requirements.",
-  "Mesop's roadmap includes expanding its component library and simplifying the onboarding processs.",
-]
+    for event in response.get("completion"):
+        chunk = event.get("chunk", {})
+        completion = completion + chunk.get("bytes", b'').decode('utf-8')
+        trace_chunk = event.get("trace", {}).get("trace", {})
+        trace_chunk = extract_sql(trace_chunk)
+        if trace_chunk:
+          if 'sql' in trace_chunk:
+            yield trace_chunk['sql']
+          elif 'table' in trace_chunk:
+            yield trace_chunk['table']        
+        if completion:
+          yield completion
