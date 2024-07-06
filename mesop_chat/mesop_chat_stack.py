@@ -17,8 +17,8 @@ class MesopChatStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
                 # Create the role for the UI backend
-        ui_backend_role = iam.Role(self, "UI Backend Role",
-            role_name=f"AppRunnerBedrockAgentUIRole-{self.region}",
+        ui_backend_role = iam.Role(self, "Mesop UI Backend Role",
+            role_name=f"AppRunnerMesopChatUIRole-{self.region}",
             assumed_by=iam.ServicePrincipal("tasks.apprunner.amazonaws.com"),
         )
 
@@ -62,21 +62,21 @@ class MesopChatStack(Stack):
 
         repository_url = ssm.StringParameter.value_for_string_parameter(
             self, 
-            "/bedrock-agent-data/GitHubRepositoryURL"
+            "/mesop-chat/GitHubRepositoryURL"
         )
 
 
         # Create the UI backend using App Runner
         ui_hosting_service = apprunner.Service(
             self, 
-            'Service', 
+            'MesopChatUIService', 
             source=apprunner.Source.from_git_hub(
                 configuration_source= apprunner.ConfigurationSourceType.REPOSITORY,
                 repository_url= repository_url,
                 branch= 'master',
                 connection= apprunner.GitHubConnection.from_connection_arn(github_connection_arn),
             ),
-            service_name= "bedrock-agent-chat-ui",
+            service_name= "mesop-chat-ui",
             auto_deployments_enabled= True,
             instance_role=ui_backend_role,
         )
