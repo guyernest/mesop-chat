@@ -61,7 +61,7 @@ def transform(input: str, history: list[mel.ChatMessage]):
         trace_chunk = extract_sql(trace_chunk)
         if trace_chunk:
           if 'sql' in trace_chunk:
-            yield trace_chunk['sql']
+            yield trace_chunk['sql'] + "\n"
           # elif 'table' in trace_chunk:
           #   yield trace_chunk['table']        
         if completion:
