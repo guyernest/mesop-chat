@@ -1,13 +1,10 @@
 import json
 from typing import Dict, Any
 import boto3
-
-
 import mesop as me
 import mesop.labs as mel
 
 ssm = boto3.client('ssm')
-
 bedrock_agent_runtime_client = boto3.client('bedrock-agent-runtime')
 agent_id = ssm.get_parameter(Name='/bedrock-agent-data/Bedrock-agent-id')['Parameter']['Value']
 agent_alias_id = ssm.get_parameter(Name='/bedrock-agent-data/Bedrock-agent-alias-id')['Parameter']['Value']
@@ -62,7 +59,5 @@ def transform(input: str, history: list[mel.ChatMessage]):
         if trace_chunk:
           if 'sql' in trace_chunk:
             yield trace_chunk['sql'] + "\n"
-          # elif 'table' in trace_chunk:
-          #   yield trace_chunk['table']        
         if completion:
           yield completion

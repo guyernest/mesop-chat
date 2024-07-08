@@ -3,7 +3,9 @@
 
 This repository is part of the [Bedrock Agent](https://github.com/guyernest/bedrock-agent) project. It contains the code for the alternative chat interface for the Bedrock Agent, using the [mesop](https://google.github.io/mesop/) library. The chat interface in the main project is built using the [FastAPI](https://fastapi.tiangolo.com/) Python library, [Jinja](https://jinja.palletsprojects.com/), and [HTMX](https://htmx.org/) JavaScript library.
 
-# CDK Python project
+The chat interface is still in Python as we want to build the Bedrock agent end-to-end in Python, including the CDK code, Lambda functions, and the chat interface. The benefit of using mesop is that it allows us to build a chat interface with the minimal and simplest code possible (less than 100 lines of code in [chat_ui.py](chat_ui.py)).
+
+## CDK Python project
 
 To manually create a virtualenv on MacOS and Linux:
 
