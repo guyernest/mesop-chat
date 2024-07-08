@@ -1,46 +1,39 @@
 
-# Welcome to your CDK Python project!
+# Alternative chat interface for Bedrock Agent
 
-This is a blank project for CDK development with Python.
+This repository is part of the [Bedrock Agent](https://github.com/guyernest/bedrock-agent) project. It contains the code for the alternative chat interface for the Bedrock Agent, using the [mesop](https://google.github.io/mesop/) library. The chat interface in the main project is built using the [FastAPI](https://fastapi.tiangolo.com/) Python library, [Jinja](https://jinja.palletsprojects.com/), and [HTMX](https://htmx.org/) JavaScript library.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+# CDK Python project
 
 To manually create a virtualenv on MacOS and Linux:
 
-```
-$ python3 -m venv .venv
+```shell
+python3 -m venv .venv
 ```
 
 After the init process completes and the virtualenv is created, you can use the following
 step to activate your virtualenv.
 
-```
-$ source .venv/bin/activate
+```shell
+source .venv/bin/activate
 ```
 
 If you are a Windows platform, you would activate the virtualenv like this:
 
-```
-% .venv\Scripts\activate.bat
+```shell
+.venv\Scripts\activate.bat
 ```
 
 Once the virtualenv is activated, you can install the required dependencies.
 
-```
-$ pip install -r requirements.txt
+```shell
+pip install -r requirements.txt
 ```
 
 At this point you can now synthesize the CloudFormation template for this code.
 
-```
-$ cdk synth
+```shell
+cdk synth
 ```
 
 To add additional dependencies, for example other CDK libraries, just add
